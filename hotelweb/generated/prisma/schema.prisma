@@ -1,0 +1,285 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id            Int                  @id @default(autoincrement())
+  name          String?              @db.VarChar(100)
+  email         String?              @db.VarChar(100)
+  phone         String?              @db.VarChar(20)
+  bookings      Booking[]
+  reviews       Review[]
+  activityLogs  ActivityLog[]
+  notifications SystemNotification[]
+  User          User[]
+
+  @@map("customers")
+}
+
+model Hotel {
+  id        Int                  @id @default(autoincrement()) @map("hotel_id")
+  name      String?              @db.VarChar(100)
+  address   String?              @db.VarChar(255)
+  city      String?              @db.VarChar(100)
+  rating    Float?
+  rooms     Room[]
+  reviews   Review[]
+  policies  HotelPolicy[]
+  events    HotelEvent[]
+  amenities HotelAmenitiesLink[]
+
+  @@map("hotels")
+}
+
+model RoomType {
+  id          Int     @id @default(autoincrement()) @map("room_type_id")
+  typeName    String? @map("type_name") @db.VarChar(50)
+  description String? @db.Text
+  rooms       Room[]
+
+  @@map("room_types")
+}
+
+model Room {
+  id           Int                 @id @default(autoincrement()) @map("room_id")
+  hotelId      Int?                @map("hotel_id")
+  roomTypeId   Int?                @map("room_type")
+  price        Decimal?            @db.Decimal(10, 2)
+  availability Boolean?
+  hotel        Hotel?              @relation(fields: [hotelId], references: [id])
+  roomType     RoomType?           @relation(fields: [roomTypeId], references: [id])
+  bookings     Booking[]
+  amenities    RoomAmenitiesLink[]
+
+  @@map("rooms")
+}
+
+model BookingStatus {
+  id         Int       @id @default(autoincrement()) @map("status_id")
+  statusName String?   @map("status_name") @db.VarChar(50)
+  bookings   Booking[]
+
+  @@map("booking_status")
+}
+
+model Booking {
+  id         Int                @id @default(autoincrement()) @map("booking_id")
+  customerId Int?               @map("customer_id")
+  roomId     Int?               @map("room_id")
+  statusId   Int?               @map("status_id")
+  checkIn    DateTime?          @map("check_in") @db.Date
+  checkOut   DateTime?          @map("check_out") @db.Date
+  totalPrice Decimal?           @map("total_price") @db.Decimal(10, 2)
+  customer   Customer?          @relation(fields: [customerId], references: [id])
+  room       Room?              @relation(fields: [roomId], references: [id])
+  status     BookingStatus?     @relation(fields: [statusId], references: [id])
+  services   BookingService[]
+  payments   Payment[]
+  promotions PromotionApplied[]
+
+  @@map("bookings")
+}
+
+model Service {
+  id          Int              @id @default(autoincrement()) @map("service_id")
+  serviceName String?          @map("service_name") @db.VarChar(100)
+  price       Decimal?         @db.Decimal(10, 2)
+  bookings    BookingService[]
+
+  @@map("services")
+}
+
+model BookingService {
+  id        Int      @id @default(autoincrement())
+  bookingId Int      @map("booking_id")
+  serviceId Int?     @map("service_id")
+  quantity  Int?
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  service   Service? @relation(fields: [serviceId], references: [id])
+
+  @@map("booking_services")
+}
+
+model EmployeeRole {
+  id          Int        @id @default(autoincrement()) @map("role_id")
+  roleName    String?    @map("role_name") @db.VarChar(50)
+  description String?    @db.Text
+  employees   Employee[]
+
+  @@map("employee_roles")
+}
+
+model Department {
+  id             Int        @id @default(autoincrement()) @map("department_id")
+  departmentName String?    @map("department_name") @db.VarChar(100)
+  employees      Employee[]
+
+  @@map("departments")
+}
+
+model Employee {
+  id           Int           @id @default(autoincrement()) @map("employee_id")
+  roleId       Int?          @map("role_id")
+  departmentId Int?          @map("department_id")
+  name         String?       @db.VarChar(100)
+  position     String?       @db.VarChar(50)
+  salary       Decimal?      @db.Decimal(10, 2)
+  role         EmployeeRole? @relation(fields: [roleId], references: [id])
+  department   Department?   @relation(fields: [departmentId], references: [id])
+
+  @@map("employees")
+}
+
+model Payment {
+  id            Int       @id @default(autoincrement()) @map("payment_id")
+  bookingId     Int?      @map("booking_id")
+  amount        Decimal?  @db.Decimal(10, 2)
+  paymentDate   DateTime? @map("payment_date") @db.Date
+  paymentMethod String?   @map("payment_method") @db.VarChar(50)
+  booking       Booking?  @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
+model Review {
+  id         Int       @id @default(autoincrement()) @map("review_id")
+  customerId Int?      @map("customer_id")
+  hotelId    Int?      @map("hotel_id")
+  rating     Int?
+  comments   String?   @db.Text
+  reviewDate DateTime? @map("review_date") @db.Date
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  hotel      Hotel?    @relation(fields: [hotelId], references: [id])
+
+  @@map("reviews")
+}
+
+model Promotion {
+  id          Int                @id @default(autoincrement()) @map("promotion_id")
+  description String?            @db.VarChar(255)
+  discount    Decimal?           @db.Decimal(5, 2)
+  startDate   DateTime?          @map("start_date") @db.Date
+  endDate     DateTime?          @map("end_date") @db.Date
+  bookings    PromotionApplied[]
+
+  @@map("promotions")
+}
+
+model RoomAmenity {
+  id          Int                 @id @default(autoincrement()) @map("amenity_id")
+  amenityName String?             @map("amenity_name") @db.VarChar(100)
+  description String?             @db.Text
+  rooms       RoomAmenitiesLink[]
+
+  @@map("room_amenities")
+}
+
+model HotelAmenity {
+  id          Int                  @id @default(autoincrement()) @map("hotel_amenity_id")
+  amenityName String?              @map("amenity_name") @db.VarChar(100)
+  description String?              @db.Text
+  hotels      HotelAmenitiesLink[]
+
+  @@map("hotel_amenities")
+}
+
+model HotelPolicy {
+  id                Int     @id @default(autoincrement()) @map("policy_id")
+  hotelId           Int?    @map("hotel_id")
+  policyDescription String? @map("policy_description") @db.Text
+  hotel             Hotel?  @relation(fields: [hotelId], references: [id])
+
+  @@map("hotel_policies")
+}
+
+model PromotionApplied {
+  id          Int       @id @default(autoincrement())
+  promotionId Int       @map("promotion_id")
+  bookingId   Int?      @map("booking_id")
+  promotion   Promotion @relation(fields: [promotionId], references: [id])
+  booking     Booking?  @relation(fields: [bookingId], references: [id])
+
+  @@map("promotion_applied")
+}
+
+model ActivityLog {
+  id      Int       @id @default(autoincrement()) @map("log_id")
+  userId  Int?      @map("user_id")
+  action  String?   @db.VarChar(50)
+  logDate DateTime? @map("log_date") @db.Timestamp
+  user    Customer? @relation(fields: [userId], references: [id])
+
+  @@map("activity_log")
+}
+
+model HotelEvent {
+  id          Int       @id @default(autoincrement()) @map("event_id")
+  hotelId     Int?      @map("hotel_id")
+  eventName   String?   @map("event_name") @db.VarChar(100)
+  eventDate   DateTime? @map("event_date") @db.Date
+  description String?   @db.Text
+  hotel       Hotel?    @relation(fields: [hotelId], references: [id])
+
+  @@map("hotel_events")
+}
+
+model SystemNotification {
+  id               Int       @id @default(autoincrement()) @map("notification_id")
+  userId           Int?      @map("user_id")
+  message          String?   @db.Text
+  notificationDate DateTime? @map("notification_date") @db.Timestamp
+  user             Customer? @relation(fields: [userId], references: [id])
+
+  @@map("system_notifications")
+}
+
+model RoomAmenitiesLink {
+  id        Int          @id @default(autoincrement())
+  roomId    Int          @map("room_id")
+  amenityId Int?         @map("amenity_id")
+  room      Room         @relation(fields: [roomId], references: [id])
+  amenity   RoomAmenity? @relation(fields: [amenityId], references: [id])
+
+  @@map("room_amenities_link")
+}
+
+model HotelAmenitiesLink {
+  id        Int           @id @default(autoincrement())
+  hotelId   Int           @map("hotel_id")
+  amenityId Int?          @map("amenity_id")
+  hotel     Hotel         @relation(fields: [hotelId], references: [id])
+  amenity   HotelAmenity? @relation(fields: [amenityId], references: [id])
+
+  @@map("hotel_amenities_link")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  name       String?
+  role       Role      @default(USER)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId Int?      @unique
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
