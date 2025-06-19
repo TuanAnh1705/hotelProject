@@ -33,6 +33,7 @@ model Hotel {
   name      String?              @db.VarChar(100)
   address   String?              @db.VarChar(255)
   city      String?              @db.VarChar(100)
+  imageUrl  String?              @db.VarChar(255)
   rating    Float?
   rooms     Room[]
   reviews   Review[]
@@ -43,23 +44,14 @@ model Hotel {
   @@map("hotels")
 }
 
-model RoomType {
-  id          Int     @id @default(autoincrement()) @map("room_type_id")
-  typeName    String? @map("type_name") @db.VarChar(50)
-  description String? @db.Text
-  rooms       Room[]
-
-  @@map("room_types")
-}
-
 model Room {
   id           Int                 @id @default(autoincrement()) @map("room_id")
   hotelId      Int?                @map("hotel_id")
-  roomTypeId   Int?                @map("room_type")
   price        Decimal?            @db.Decimal(10, 2)
   availability Boolean?
+  roomType     String?             @db.VarChar(255)
+  imageUrl     String?             @db.VarChar(255)
   hotel        Hotel?              @relation(fields: [hotelId], references: [id])
-  roomType     RoomType?           @relation(fields: [roomTypeId], references: [id])
   bookings     Booking[]
   amenities    RoomAmenitiesLink[]
 

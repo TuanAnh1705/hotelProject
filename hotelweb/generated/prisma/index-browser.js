@@ -132,21 +132,17 @@ exports.Prisma.HotelScalarFieldEnum = {
   name: 'name',
   address: 'address',
   city: 'city',
+  imageUrl: 'imageUrl',
   rating: 'rating'
-};
-
-exports.Prisma.RoomTypeScalarFieldEnum = {
-  id: 'id',
-  typeName: 'typeName',
-  description: 'description'
 };
 
 exports.Prisma.RoomScalarFieldEnum = {
   id: 'id',
   hotelId: 'hotelId',
-  roomTypeId: 'roomTypeId',
   price: 'price',
-  availability: 'availability'
+  availability: 'availability',
+  roomType: 'roomType',
+  imageUrl: 'imageUrl'
 };
 
 exports.Prisma.BookingStatusScalarFieldEnum = {
@@ -310,12 +306,13 @@ exports.Prisma.CustomerOrderByRelevanceFieldEnum = {
 exports.Prisma.HotelOrderByRelevanceFieldEnum = {
   name: 'name',
   address: 'address',
-  city: 'city'
+  city: 'city',
+  imageUrl: 'imageUrl'
 };
 
-exports.Prisma.RoomTypeOrderByRelevanceFieldEnum = {
-  typeName: 'typeName',
-  description: 'description'
+exports.Prisma.RoomOrderByRelevanceFieldEnum = {
+  roomType: 'roomType',
+  imageUrl: 'imageUrl'
 };
 
 exports.Prisma.BookingStatusOrderByRelevanceFieldEnum = {
@@ -392,7 +389,6 @@ exports.Role = exports.$Enums.Role = {
 exports.Prisma.ModelName = {
   Customer: 'Customer',
   Hotel: 'Hotel',
-  RoomType: 'RoomType',
   Room: 'Room',
   BookingStatus: 'BookingStatus',
   Booking: 'Booking',

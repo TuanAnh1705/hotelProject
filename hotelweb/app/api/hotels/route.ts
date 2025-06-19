@@ -1,49 +1,33 @@
-import type { NextRequest } from "next/server"
-import { prisma } from "@/lib/prisma"
-import { createApiResponse, createApiError, asyncHandler, validateMethod } from "@/lib/utils/api-helpers"
+import { type NextRequest, NextResponse } from "next/server"
+import { PrismaClient } from "@/generated/prisma"
 
-export const GET = asyncHandler(async (request: NextRequest) => {
-  validateMethod(request, ["GET"])
+const prisma = new PrismaClient()
 
+// GET - Fetch all hotels
+export async function GET() {
   try {
     const hotels = await prisma.hotel.findMany({
-      include: {
-        rooms: {
-          include: {
-            roomType: true,
-            amenities: {
-              include: {
-                amenity: true,
-              },
-            },
-          },
-        },
-        amenities: {
-          include: {
-            amenity: true,
-          },
-        },
-        reviews: true,
+      orderBy: {
+        id: "desc",
       },
     })
 
-    return createApiResponse(hotels)
+    return NextResponse.json(hotels)
   } catch (error) {
-    console.error("Failed to fetch hotels:", error)
-    return createApiError("Failed to fetch hotels")
+    console.error("Error fetching hotels:", error)
+    return NextResponse.json({ error: "Failed to fetch hotels" }, { status: 500 })
   }
-})
+}
 
-export const POST = asyncHandler(async (request: NextRequest) => {
-  validateMethod(request, ["POST"])
-
+// POST - Create new hotel
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, address, city, rating } = body
+    const { name, address, city, rating, imageUrl } = body
 
     // Validate required fields
     if (!name || !address || !city || !rating) {
-      return createApiError("Missing required fields", 400)
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
     const hotel = await prisma.hotel.create({
@@ -52,17 +36,13 @@ export const POST = asyncHandler(async (request: NextRequest) => {
         address,
         city,
         rating: Number.parseFloat(rating),
-        
+        imageUrl: imageUrl || null,
       },
-     
     })
 
-    // Update rooms to belong to this hotel if roomIds provided
-  
-
-    return createApiResponse(hotel, 201)
+    return NextResponse.json(hotel, { status: 201 })
   } catch (error) {
-    console.error("Failed to create hotel:", error)
-    return createApiError("Failed to create hotel")
+    console.error("Error creating hotel:", error)
+    return NextResponse.json({ error: "Failed to create hotel" }, { status: 500 })
   }
-})
+}

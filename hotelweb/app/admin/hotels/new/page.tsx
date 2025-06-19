@@ -1,241 +1,215 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Building2, MapPin, Star } from "lucide-react"
 import Link from "next/link"
-import { roomService } from "@/services/roomService"
-import { showToast } from "@/lib/toast"
 import api from "@/lib/api"
 import toast from "react-hot-toast"
+import ImageUpload from "@/components/fileUpload"
 
 
-interface Room {
-  id: number
-  price: number
-  availability: boolean
-  hotel: any
-  roomType: any
+interface FormData {
+  name: string
+  address: string
+  city: string
+  rating: string
+  imageUrl: string
 }
 
 export default function NewHotelPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [amenities, setAmenities] = useState()
-  const [rooms, setRooms] = useState<Room[]>([])
-  const [selectedRooms, setSelectedRooms] = useState<number[]>([])
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     address: "",
     city: "",
     rating: "",
+    imageUrl: "",
   })
 
-  useEffect(() => {
-    fetchAmenities()
-    fetchRooms()
-  }, [])
-
-  const fetchAmenities = async () => {
-    try {
-      const res = await api.get("/api/hotels")
-      setAmenities(res?.data)
-    } catch (error) {
-      console.error("Failed to fetch amenities:", error)
-      showToast.error("Failed to fetch amenities")
-    }
+  const handleInputChange = (field: keyof Omit<FormData, "imageUrl">, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
-
-  
-
-  const fetchRooms = async () => {
-    try {
-      const data = await roomService.getAll()
-      // Only show rooms that don't belong to any hotel
-      setRooms(data.filter((room: any) => !room.hotel))
-    } catch (error) {
-      console.error("Failed to fetch rooms:", error)
-      showToast.error("Failed to fetch rooms")
-    }
-  }
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-     const res = await api.post("/api/hotels",formData)
-     if(res.data){
-      toast.success("thành công")
-         router.push("/admin/hotels")
-     }
+      const res = await api.post("/api/hotels", {
+        name: formData.name,
+        address: formData.address,
+        city: formData.city,
+        rating: formData.rating,
+        imageUrl: formData.imageUrl || null,
+      })
 
-   
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      // Error already handled by toast.promise
+      if (res.data) {
+        toast.success("Hotel created successfully!")
+        router.push("/admin/hotels")
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Failed to create hotel:", error)
+      const errorMessage = error.response?.data?.error || "Failed to create hotel. Please try again."
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
   }
 
-  const handleRoomChange = (roomId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedRooms([...selectedRooms, roomId])
-    } else {
-      setSelectedRooms(selectedRooms.filter((id) => id !== roomId))
-    }
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link href="/admin/hotels">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Add New Hotel</h1>
-          <p className="text-muted-foreground">Create a new hotel property</p>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Enter the basic details of the hotel</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
+      <div className="mx-auto max-w-4xl space-y-8">
+        {/* Header Section */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link href="/admin/hotels">
+              <Button variant="outline" size="sm" className="shadow-sm">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Hotels
+              </Button>
+            </Link>
+            <div className="flex items-center space-x-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Building2 className="h-6 w-6 text-primary" />
+              </div>
               <div>
-                <Label htmlFor="name">Hotel Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900">Add New Hotel</h1>
+                <p className="text-slate-600">Create a new hotel property in your system</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Form Section */}
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="pb-6">
+              <CardTitle className="flex items-center space-x-2 text-xl">
+                <Building2 className="h-5 w-5 text-primary" />
+                <span>Hotel Information</span>
+              </CardTitle>
+              <CardDescription className="text-base">
+                Enter the basic details and information about the hotel property
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Hotel Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium text-slate-700">
+                    Hotel Name *
+                  </Label>
+                  <Input
+                    id="name"
+                    placeholder="Enter hotel name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary"
+                    required
+                  />
+                </div>
+
+                {/* City */}
+                <div className="space-y-2">
+                  <Label htmlFor="city" className="text-sm font-medium text-slate-700 flex items-center space-x-1">
+                    <MapPin className="h-4 w-4" />
+                    <span>City *</span>
+                  </Label>
+                  <Input
+                    id="city"
+                    placeholder="Enter city name"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary"
+                    required
+                  />
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="address">Address</Label>
+              {/* Address */}
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-sm font-medium text-slate-700">
+                  Full Address *
+                </Label>
                 <Textarea
                   id="address"
+                  placeholder="Enter complete hotel address"
                   value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  onChange={(e) => handleInputChange("address", e.target.value)}
+                  className="min-h-[100px] border-slate-200 focus:border-primary focus:ring-primary resize-none"
                   required
                 />
               </div>
 
-              <div>
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="rating">Rating (1-5)</Label>
-                <Input
-                  id="rating"
-                  type="number"
-                  min="1"
-                  max="5"
-                  step="0.1"
-                  value={formData.rating}
-                  onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
-                  required
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Hotel Image</CardTitle>
-              <CardDescription>Upload a main image for the hotel</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-center w-full">
-                  <label
-                    htmlFor="image"
-                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                  >
-                  </label>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Hotel Amenities</CardTitle>
-            <CardDescription>Select the amenities available at this hotel</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-    
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Available Rooms</CardTitle>
-            <CardDescription>Select existing rooms to assign to this hotel</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2">
-              {rooms.map((room) => (
-                <div key={room.id} className="flex items-center space-x-2 p-3 border rounded-lg">
-                  <Checkbox
-                    id={`room-${room.id}`}
-                    checked={selectedRooms.includes(room.id)}
-                    onCheckedChange={(checked) => handleRoomChange(room.id, checked as boolean)}
+              {/* Rating */}
+              <div className="space-y-2">
+                <Label htmlFor="rating" className="text-sm font-medium text-slate-700 flex items-center space-x-1">
+                  <Star className="h-4 w-4" />
+                  <span>Hotel Rating *</span>
+                </Label>
+                <div className="relative max-w-xs">
+                  <Input
+                    id="rating"
+                    type="number"
+                    min="1"
+                    max="5"
+                    step="0.1"
+                    placeholder="4.5"
+                    value={formData.rating}
+                    onChange={(e) => handleInputChange("rating", e.target.value)}
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary pr-16"
+                    required
                   />
-                  <div className="flex-1">
-                    <Label htmlFor={`room-${room.id}`} className="text-sm font-medium">
-                      {room.roomType?.typeName || "Unknown Type"}
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      ${room.price} • {room.availability ? "Available" : "Unavailable"}
-                    </p>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-slate-500 text-sm">/ 5.0</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <p className="text-xs text-slate-500">Enter a rating between 1.0 and 5.0</p>
+              </div>
 
-        <div className="flex justify-end space-x-4">
-          <Link href="/admin/hotels">
-            <Button variant="outline">Cancel</Button>
-          </Link>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Creating..." : "Create Hotel"}
-          </Button>
-        </div>
-      </form>
+              {/* Image Upload */}
+              <ImageUpload
+                value={formData.imageUrl}
+                onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+                onRemove={() => setFormData((prev) => ({ ...prev, imageUrl: "" }))}
+                label="Hotel Image"
+              />
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end space-x-4 pt-6">
+            <Link href="/admin/hotels">
+              <Button variant="outline" size="lg" className="min-w-[120px] shadow-sm">
+                Cancel
+              </Button>
+            </Link>
+            <Button type="submit" disabled={loading} size="lg" className="min-w-[140px] shadow-sm">
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <span>Creating...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Building2 className="h-4 w-4" />
+                  <span>Create Hotel</span>
+                </div>
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
-

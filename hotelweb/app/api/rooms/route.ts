@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { NEXT_URL } from "next/dist/client/components/app-router-headers"
 
-export async function GET() {
+export async function GET(req:NextRequest) {
+    const searchParams = req.nextUrl.searchParams;
+  const roomType =searchParams.get("roomtype")||""
   try {
     const rooms = await prisma.room.findMany({
       include: {
         hotel: true,
-        roomType: true,
         amenities: {
           include: {
             amenity: true,
@@ -15,7 +17,15 @@ export async function GET() {
         },
       },
     })
-    return NextResponse.json(rooms)
+    
+    const countRooms = await prisma.room.count({
+      where:{
+        roomType:roomType
+      }
+    })
+    return NextResponse.json({
+      rooms,countRooms
+    })
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch rooms" }, { status: 500 })
   }
@@ -24,24 +34,24 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { hotelId, roomTypeId, price, availability, amenityIds } = body
+    const { hotelId, roomType, price, imageUrl} = body
 
     const room = await prisma.room.create({
       data: {
         hotelId: hotelId ? Number.parseInt(hotelId) : null,
-        roomTypeId: Number.parseInt(roomTypeId),
+        roomType,
         price: Number.parseFloat(price),
-        availability: availability === "true",
-        amenities: {
-          create:
-            amenityIds?.map((amenityId: number) => ({
-              amenityId,
-            })) || [],
-        },
+        availability:true,
+        imageUrl,
+        // amenities: {
+        //   create:
+        //     amenityIds?.map((amenityId: number) => ({
+        //       amenityId,
+        //     })) || [],
+        // },
       },
       include: {
         hotel: true,
-        roomType: true,
         amenities: {
           include: {
             amenity: true,
