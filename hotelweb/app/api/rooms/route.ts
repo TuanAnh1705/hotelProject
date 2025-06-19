@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { NEXT_URL } from "next/dist/client/components/app-router-headers"
 
 export async function GET(req:NextRequest) {
     const searchParams = req.nextUrl.searchParams;
