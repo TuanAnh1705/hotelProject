@@ -73,11 +73,6 @@ const menuSections: MenuSection[] = [
         href: "/admin/rooms",
         icon: Bed,
       },
-      {
-        title: "Room Types",
-        href: "/admin/room-types",
-        icon: Bed,
-      },
     ],
   },
   {

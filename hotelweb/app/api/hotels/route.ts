@@ -10,9 +10,17 @@ export async function GET() {
       orderBy: {
         id: "desc",
       },
+      include: {
+        _count: {
+          select: { rooms: true },
+        }
+      }
     })
 
-    return NextResponse.json(hotels)
+
+    // kiểm tra cái id của rooms trùng id hotel 7  // 3 
+
+    return NextResponse.json({ hotels })
   } catch (error) {
     console.error("Error fetching hotels:", error)
     return NextResponse.json({ error: "Failed to fetch hotels" }, { status: 500 })

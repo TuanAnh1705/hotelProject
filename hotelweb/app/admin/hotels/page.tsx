@@ -4,7 +4,7 @@ import api from "@/lib/api"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -26,10 +26,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Building2, MapPin, Star, Search, Plus, Edit, Trash2, Eye, Loader2, ImageIcon } from "lucide-react"
+import { Building2, MapPin, Star, Search, Plus, Edit, Trash2, Eye, Loader2, ImageIcon, BedSingle } from "lucide-react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import Image from "next/image"
+import RoomFormDialog from "../rooms/components/roomDialog"
+import HotelFormDialog from "./components/addNewHotel"
+import HotelEditDialog from "./components/editHotel"
 
 interface Hotel {
   id: number
@@ -38,21 +40,45 @@ interface Hotel {
   city: string
   rating: number
   imageUrl?: string
+  _count: { rooms: number }
+}
+
+interface HotelAmenities{
+  id: number,
+  amenityName: string,
+  description: string
 }
 
 const HotelsPage = () => {
-  const router = useRouter()
   const [hotels, setHotels] = useState<Hotel[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null)
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null)
-
+  const [amenitiesHotel, setAmenitiesHotel] = useState<HotelAmenities[] | null> (null)
+  
   const fetchHotels = async () => {
     try {
       setLoading(true)
-      const res = await api.get("/api/hotels")
-      setHotels(res.data)
+      const res = await api.get(`/api/hotels`)
+      setHotels(res.data.hotels)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Failed to fetch hotels", error)
+      const errorMessage = error.response?.data?.error || "Failed to load hotels"
+      toast.error(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchAmenitiesHotel = async () => {
+    try {
+      setLoading(true)
+      const res = await api.get(`/api/hotel-amenities`)
+      setAmenitiesHotel(res.data?.data)
+      console.log(res);
+      
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to fetch hotels", error)
@@ -64,6 +90,7 @@ const HotelsPage = () => {
   }
 
   useEffect(() => {
+    fetchAmenitiesHotel()
     fetchHotels()
   }, [])
 
@@ -131,40 +158,50 @@ const HotelsPage = () => {
   return (
     <div className="flex flex-col gap-4 min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
       {/* Search + Add Section */}
-      <Card className="shadow-sm bg-white/80 backdrop-blur-sm flex flex-col gap-2">
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="relative w-full md:max-w-md">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input
-                placeholder="Search hotels by name, city, or address..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-11 border-slate-200 focus:border-primary focus:ring-primary w-full"
+      <Card className="shadow-sm bg-white/80 backdrop-blur-sm">
+        <CardHeader className="p-6 pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            {/* Cột trái: Tiêu đề */}
+            <div className="flex items-center space-x-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                <Building2 className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900">Quản Lý Khách Sạn</h1>
+                <p className="text-sm font-bold text-muted-foreground">
+                  Tổng số: {hotels?.length || 0} khách sạn
+                </p>
+              </div>
+            </div>
+
+            {/* Cột giữa: Search input */}
+            <div className="w-full">
+              <div className="relative max-w-md mx-auto">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Tìm theo tên, thành phố hoặc địa chỉ..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-11 border-slate-200 focus:border-primary focus:ring-primary w-full"
+                />
+              </div>
+            </div>
+
+            {/* Cột phải: Nút thêm */}
+            <div className="flex justify-end">
+              <HotelFormDialog
+              amenities={amenitiesHotel|| []}
+                trigger={
+                  <Button variant="default" className="w-full md:w-auto shadow-sm">
+                    + Thêm Khách Sạn
+                  </Button>
+                }
               />
             </div>
-            <Link href="/admin/hotels/new">
-              <Button size="lg" className="w-full md:w-auto shadow-sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add New Hotel
-              </Button>
-            </Link>
           </div>
-        </CardContent>
-        <CardFooter>
-          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-          <div className="flex items-center space-x-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <Building2 className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900">Hotels Management</h1>
-              <p className="text-slate-600">Manage your hotel properties ({hotels?.length || 0} hotels)</p>
-            </div>
-          </div>
-        </div>
-        </CardFooter>
+        </CardHeader>
       </Card>
+
 
       <div className="mx-auto max-w-7xl space-y-8">
 
@@ -218,18 +255,20 @@ const HotelsPage = () => {
                 </CardHeader>
 
                 <CardContent className="space-y-2 px-3 pb-3 pt-1">
-                  <div>
-                    <p className="text-xs text-slate-500 truncate">{hotel.address}</p>
+                  <div className="flex justify-between items-center mx-2">
+                    <div className="">
+                      <p className="text-xs text-slate-500 truncate mb-2">{hotel.address}</p>
+                      <div className="flex items-center justify-between">{renderStars(hotel.rating)}</div>
+                    </div>
+                    {hotel._count.rooms > 0 && <div className="flex flex-row items-center font-bold text-base text-slate-500 truncate mb-2"><BedSingle className="font-bold mr-2 h-4 w-4" /> {hotel._count.rooms} rooms</div>}
                   </div>
-
-                  <div className="flex items-center justify-between">{renderStars(hotel.rating)}</div>
 
                   <div className="flex items-center space-x-2 pt-4 border-t border-slate-100">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="sm" className="flex-1" onClick={() => handleView(hotel)}>
                           <Eye className="mr-2 h-4 w-4" />
-                          View
+                          Xem
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-lg">
@@ -238,7 +277,7 @@ const HotelsPage = () => {
                             <Building2 className="h-5 w-5 text-primary" />
                             <span>{selectedHotel?.name}</span>
                           </DialogTitle>
-                          <DialogDescription>Hotel Details</DialogDescription>
+                          <DialogDescription>Chi tiết Khách sạn</DialogDescription>
                         </DialogHeader>
                         {selectedHotel && (
                           <div className="space-y-4">
@@ -255,25 +294,37 @@ const HotelsPage = () => {
                               </div>
                             )}
 
+                            {/* Hotel Info Grid */}
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <p className="text-sm font-medium text-slate-700">Hotel ID</p>
+                                <p className="text-sm font-medium text-slate-700">ID Khách Sạn</p>
                                 <p className="text-sm text-slate-600">{selectedHotel.id}</p>
                               </div>
                               <div>
-                                <p className="text-sm font-medium text-slate-700">Rating</p>
-                                <div className="flex items-center space-x-1">{renderStars(selectedHotel.rating)}</div>
+                                <p className="text-sm font-medium text-slate-700">Đánh Giá</p>
+                                <div className="flex items-center space-x-1">
+                                  {renderStars(selectedHotel.rating)}
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-slate-700">Thành Phố</p>
+                                <p className="text-sm text-slate-600 flex items-center space-x-1">
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{selectedHotel.city}</span>
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-slate-700">Tổng Số Phòng</p>
+                                <p className="text-sm text-slate-600 flex items-center space-x-1">
+                                  <BedSingle className="h-4 w-4 text-primary" />
+                                  <span>{selectedHotel._count?.rooms ?? 0}</span>
+                                </p>
                               </div>
                             </div>
+
+                            {/* Full Address */}
                             <div>
-                              <p className="text-sm font-medium text-slate-700">City</p>
-                              <p className="text-sm text-slate-600 flex items-center space-x-1">
-                                <MapPin className="h-4 w-4" />
-                                <span>{selectedHotel.city}</span>
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-slate-700">Full Address</p>
+                              <p className="text-sm font-medium text-slate-700">Địa Chỉ Đầy Đủ</p>
                               <p className="text-sm text-slate-600 leading-relaxed">{selectedHotel.address}</p>
                             </div>
                           </div>
@@ -281,11 +332,19 @@ const HotelsPage = () => {
                       </DialogContent>
                     </Dialog>
 
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => router.push(`/admin/hotels/edit?id=${hotel.id}`)}>
+                    <HotelEditDialog
+                      hotelId={hotel.id}
+                      trigger={<Button variant="outline" size="sm" className="flex-1"><Edit className="mr-2 h-4 w-4" />Chỉnh Sửa</Button>}
+                    />
+
+                    {/* <Button variant="outline" size="sm" className="flex-1" onClick={() => router.push(`/admin/hotels/edit?id=${hotel.id}`)}>
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
-                    </Button>
-                    <Button onClick={() => router.push(`/admin/rooms/new?id=${hotel.id}`)}>Tạo room</Button>
+                    </Button> */}
+                    <RoomFormDialog
+                      hotelId={hotel.id}
+                      trigger={<Button variant="default">+ Thêm Phòng</Button>}
+                    />
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -303,19 +362,19 @@ const HotelsPage = () => {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Hotel</AlertDialogTitle>
+                          <AlertDialogTitle>Xoá Khách Sạn</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Are you sure you want to delete {hotel.name}? This action cannot be undone and will
-                            permanently remove the hotel from your system.
+                            Bạn có chắc chắn muốn xoá khách sạn {hotel.name}? Hành động này có thể không được quay lại
+                            và khách sạn có thể sẽ được xoá khỏi dữ liệu của bạn.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>Huỷ</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(hotel.id)}
                             className="bg-red-600 hover:bg-red-700"
                           >
-                            Delete Hotel
+                            Xoá Khách Sạn
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -348,7 +407,7 @@ const HotelsPage = () => {
                   <Link href="/admin/hotels/new">
                     <Button size="lg" className="mt-4">
                       <Plus className="mr-2 h-4 w-4" />
-                      Add Your First Hotel
+                      Hãy thêm khách sạn đầu tiên
                     </Button>
                   </Link>
                 )}
