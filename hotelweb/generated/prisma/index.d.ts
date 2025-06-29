@@ -17427,18 +17427,21 @@ export namespace Prisma {
     id: number | null
     amenityName: string | null
     description: string | null
+    icon: string | null
   }
 
   export type HotelAmenityMaxAggregateOutputType = {
     id: number | null
     amenityName: string | null
     description: string | null
+    icon: string | null
   }
 
   export type HotelAmenityCountAggregateOutputType = {
     id: number
     amenityName: number
     description: number
+    icon: number
     _all: number
   }
 
@@ -17455,18 +17458,21 @@ export namespace Prisma {
     id?: true
     amenityName?: true
     description?: true
+    icon?: true
   }
 
   export type HotelAmenityMaxAggregateInputType = {
     id?: true
     amenityName?: true
     description?: true
+    icon?: true
   }
 
   export type HotelAmenityCountAggregateInputType = {
     id?: true
     amenityName?: true
     description?: true
+    icon?: true
     _all?: true
   }
 
@@ -17560,6 +17566,7 @@ export namespace Prisma {
     id: number
     amenityName: string | null
     description: string | null
+    icon: string | null
     _count: HotelAmenityCountAggregateOutputType | null
     _avg: HotelAmenityAvgAggregateOutputType | null
     _sum: HotelAmenitySumAggregateOutputType | null
@@ -17585,6 +17592,7 @@ export namespace Prisma {
     id?: boolean
     amenityName?: boolean
     description?: boolean
+    icon?: boolean
     hotels?: boolean | HotelAmenity$hotelsArgs<ExtArgs>
     _count?: boolean | HotelAmenityCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["hotelAmenity"]>
@@ -17595,9 +17603,10 @@ export namespace Prisma {
     id?: boolean
     amenityName?: boolean
     description?: boolean
+    icon?: boolean
   }
 
-  export type HotelAmenityOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amenityName" | "description", ExtArgs["result"]["hotelAmenity"]>
+  export type HotelAmenityOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amenityName" | "description" | "icon", ExtArgs["result"]["hotelAmenity"]>
   export type HotelAmenityInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     hotels?: boolean | HotelAmenity$hotelsArgs<ExtArgs>
     _count?: boolean | HotelAmenityCountOutputTypeDefaultArgs<ExtArgs>
@@ -17612,6 +17621,7 @@ export namespace Prisma {
       id: number
       amenityName: string | null
       description: string | null
+      icon: string | null
     }, ExtArgs["result"]["hotelAmenity"]>
     composites: {}
   }
@@ -17985,6 +17995,7 @@ export namespace Prisma {
     readonly id: FieldRef<"HotelAmenity", 'Int'>
     readonly amenityName: FieldRef<"HotelAmenity", 'String'>
     readonly description: FieldRef<"HotelAmenity", 'String'>
+    readonly icon: FieldRef<"HotelAmenity", 'String'>
   }
     
 
@@ -26368,7 +26379,8 @@ export namespace Prisma {
   export const HotelAmenityScalarFieldEnum: {
     id: 'id',
     amenityName: 'amenityName',
-    description: 'description'
+    description: 'description',
+    icon: 'icon'
   };
 
   export type HotelAmenityScalarFieldEnum = (typeof HotelAmenityScalarFieldEnum)[keyof typeof HotelAmenityScalarFieldEnum]
@@ -26566,7 +26578,8 @@ export namespace Prisma {
 
   export const HotelAmenityOrderByRelevanceFieldEnum: {
     amenityName: 'amenityName',
-    description: 'description'
+    description: 'description',
+    icon: 'icon'
   };
 
   export type HotelAmenityOrderByRelevanceFieldEnum = (typeof HotelAmenityOrderByRelevanceFieldEnum)[keyof typeof HotelAmenityOrderByRelevanceFieldEnum]
@@ -27498,6 +27511,7 @@ export namespace Prisma {
     id?: IntFilter<"HotelAmenity"> | number
     amenityName?: StringNullableFilter<"HotelAmenity"> | string | null
     description?: StringNullableFilter<"HotelAmenity"> | string | null
+    icon?: StringNullableFilter<"HotelAmenity"> | string | null
     hotels?: HotelAmenitiesLinkListRelationFilter
   }
 
@@ -27505,6 +27519,7 @@ export namespace Prisma {
     id?: SortOrder
     amenityName?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
+    icon?: SortOrderInput | SortOrder
     hotels?: HotelAmenitiesLinkOrderByRelationAggregateInput
     _relevance?: HotelAmenityOrderByRelevanceInput
   }
@@ -27516,6 +27531,7 @@ export namespace Prisma {
     NOT?: HotelAmenityWhereInput | HotelAmenityWhereInput[]
     amenityName?: StringNullableFilter<"HotelAmenity"> | string | null
     description?: StringNullableFilter<"HotelAmenity"> | string | null
+    icon?: StringNullableFilter<"HotelAmenity"> | string | null
     hotels?: HotelAmenitiesLinkListRelationFilter
   }, "id">
 
@@ -27523,6 +27539,7 @@ export namespace Prisma {
     id?: SortOrder
     amenityName?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
+    icon?: SortOrderInput | SortOrder
     _count?: HotelAmenityCountOrderByAggregateInput
     _avg?: HotelAmenityAvgOrderByAggregateInput
     _max?: HotelAmenityMaxOrderByAggregateInput
@@ -27537,6 +27554,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"HotelAmenity"> | number
     amenityName?: StringNullableWithAggregatesFilter<"HotelAmenity"> | string | null
     description?: StringNullableWithAggregatesFilter<"HotelAmenity"> | string | null
+    icon?: StringNullableWithAggregatesFilter<"HotelAmenity"> | string | null
   }
 
   export type HotelPolicyWhereInput = {
@@ -28736,6 +28754,7 @@ export namespace Prisma {
   export type HotelAmenityCreateInput = {
     amenityName?: string | null
     description?: string | null
+    icon?: string | null
     hotels?: HotelAmenitiesLinkCreateNestedManyWithoutAmenityInput
   }
 
@@ -28743,12 +28762,14 @@ export namespace Prisma {
     id?: number
     amenityName?: string | null
     description?: string | null
+    icon?: string | null
     hotels?: HotelAmenitiesLinkUncheckedCreateNestedManyWithoutAmenityInput
   }
 
   export type HotelAmenityUpdateInput = {
     amenityName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     hotels?: HotelAmenitiesLinkUpdateManyWithoutAmenityNestedInput
   }
 
@@ -28756,6 +28777,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     amenityName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
     hotels?: HotelAmenitiesLinkUncheckedUpdateManyWithoutAmenityNestedInput
   }
 
@@ -28763,17 +28785,20 @@ export namespace Prisma {
     id?: number
     amenityName?: string | null
     description?: string | null
+    icon?: string | null
   }
 
   export type HotelAmenityUpdateManyMutationInput = {
     amenityName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type HotelAmenityUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     amenityName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type HotelPolicyCreateInput = {
@@ -30058,6 +30083,7 @@ export namespace Prisma {
     id?: SortOrder
     amenityName?: SortOrder
     description?: SortOrder
+    icon?: SortOrder
   }
 
   export type HotelAmenityAvgOrderByAggregateInput = {
@@ -30068,12 +30094,14 @@ export namespace Prisma {
     id?: SortOrder
     amenityName?: SortOrder
     description?: SortOrder
+    icon?: SortOrder
   }
 
   export type HotelAmenityMinOrderByAggregateInput = {
     id?: SortOrder
     amenityName?: SortOrder
     description?: SortOrder
+    icon?: SortOrder
   }
 
   export type HotelAmenitySumOrderByAggregateInput = {
@@ -34130,12 +34158,14 @@ export namespace Prisma {
   export type HotelAmenityCreateWithoutHotelsInput = {
     amenityName?: string | null
     description?: string | null
+    icon?: string | null
   }
 
   export type HotelAmenityUncheckedCreateWithoutHotelsInput = {
     id?: number
     amenityName?: string | null
     description?: string | null
+    icon?: string | null
   }
 
   export type HotelAmenityCreateOrConnectWithoutHotelsInput = {
@@ -34193,12 +34223,14 @@ export namespace Prisma {
   export type HotelAmenityUpdateWithoutHotelsInput = {
     amenityName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type HotelAmenityUncheckedUpdateWithoutHotelsInput = {
     id?: IntFieldUpdateOperationsInput | number
     amenityName?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    icon?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CustomerCreateWithoutUserInput = {

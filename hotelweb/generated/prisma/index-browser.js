@@ -227,7 +227,8 @@ exports.Prisma.RoomAmenityScalarFieldEnum = {
 exports.Prisma.HotelAmenityScalarFieldEnum = {
   id: 'id',
   amenityName: 'amenityName',
-  description: 'description'
+  description: 'description',
+  icon: 'icon'
 };
 
 exports.Prisma.HotelPolicyScalarFieldEnum = {
@@ -356,7 +357,8 @@ exports.Prisma.RoomAmenityOrderByRelevanceFieldEnum = {
 
 exports.Prisma.HotelAmenityOrderByRelevanceFieldEnum = {
   amenityName: 'amenityName',
-  description: 'description'
+  description: 'description',
+  icon: 'icon'
 };
 
 exports.Prisma.HotelPolicyOrderByRelevanceFieldEnum = {

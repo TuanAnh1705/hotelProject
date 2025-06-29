@@ -16,7 +16,11 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 
     const amenity = await prisma.hotelAmenity.findUnique({
       where: { id: amenityId },
-      include: {
+      select: {
+        id: true,
+        amenityName: true,
+        description: true,
+        icon: true,
         hotels: {
           include: {
             hotel: {
@@ -24,7 +28,8 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
             },
           },
         },
-      },
+      }
+
     });
 
     if (!amenity) {
@@ -40,12 +45,13 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 // PUT - Cập nhật tiện ích
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const amenityId = getAmenityId(params);
-    const { amenityName, description } = await request.json();
+    const { id } = await params
+    const amenityId = Number(id)
+    const { amenityName, description, icon } = await request.json();
 
     const updated = await prisma.hotelAmenity.update({
       where: { id: amenityId },
-      data: { amenityName, description },
+      data: { amenityName, description, icon },
     });
 
     return NextResponse.json({ success: true, data: updated });
@@ -57,7 +63,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 // DELETE - Xoá tiện ích và các liên kết
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const amenityId = getAmenityId(params);
+    const { id } = await params
+    const amenityId = Number(id)
 
     await prisma.hotelAmenitiesLink.deleteMany({ where: { amenityId } });
     await prisma.hotelAmenity.delete({ where: { id: amenityId } });
@@ -71,7 +78,8 @@ export async function DELETE(_: NextRequest, { params }: { params: { id: string 
 // PATCH - Tạo hoặc xoá liên kết hotel-amenity
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const amenityId = getAmenityId(params);
+    const { id } = await params
+    const amenityId = Number(id)
     const { hotelId, action } = await request.json();
 
     if (!hotelId || !["link", "unlink"].includes(action)) {
@@ -107,3 +115,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return NextResponse.json({ success: false, error: error.message || "Failed to process link/unlink" }, { status: 500 });
   }
 }
+
+// 
+

@@ -4,10 +4,10 @@ import api from "@/lib/api"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Building2, Search, Plus, Edit, Trash2, Eye, Loader2, ImageIcon } from "lucide-react"
+import { Building2, Search, Plus, Edit, Trash2, Eye, Loader2, ImageIcon, DollarSign } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import ViewRoomDialog from "./components/viewRoomDialog"
@@ -26,7 +26,7 @@ interface Room {
   }
 }
 
-const HotelsPage = () => {
+const RoomsPage = () => {
   const [rooms, setRooms] = useState<Room[] | null>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -42,7 +42,7 @@ const HotelsPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to fetch rooms", error)
-      const errorMessage = error.response?.data?.error || "Failed to load hotels"
+      const errorMessage = error.response?.data?.error || "Failed to load rooms"
       toast.error(errorMessage)
     } finally {
       setLoading(false)
@@ -117,9 +117,7 @@ const HotelsPage = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold tracking-tight text-slate-900">Quản Lý Phòng</h1>
-                <p className="text-sm font-bold text-muted-foreground">
-                  Tổng số: {rooms?.length || 0} phòng
-                </p>
+                <p className="text-sm font-bold text-muted-foreground">Tổng số: {rooms?.length || 0} phòng</p>
               </div>
             </div>
 
@@ -128,34 +126,32 @@ const HotelsPage = () => {
               <div className="relative max-w-md mx-auto">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
-                  placeholder="Tìm theo tên, thành phố hoặc địa chỉ..."
+                  placeholder="Tìm theo loại phòng, khách sạn..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 h-11 border-slate-200 focus:border-primary focus:ring-primary w-full"
                 />
               </div>
             </div>
-
           </div>
         </CardHeader>
       </Card>
 
       <div className="mx-auto max-w-7xl space-y-8">
-
         {/* Rooms Grid */}
         {filteredRooms && filteredRooms.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {filteredRooms.map((room) => (
               <Card
                 key={room.id}
-                className="h-[260px] w-[420px] shadow-lg border-0 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-200 group overflow-hidden flex flex-col gap-1"
+                className="shadow-lg border-0 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-200 group overflow-hidden flex flex-col h-full"
               >
                 {/* Room Image */}
-                <div className="relative h-24 bg-gradient-to-br from-slate-100 to-slate-200">
+                <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
                   {room.imageUrl ? (
                     <Image
-                      width={500}
-                      height={500}
+                      width={300}
+                      height={160}
                       src={room.imageUrl || "/placeholder.svg"}
                       alt={room.roomType}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
@@ -163,61 +159,100 @@ const HotelsPage = () => {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="flex flex-col items-center space-y-2 text-slate-400">
-                        <ImageIcon className="h-12 w-12" />
-                        <span className="text-sm font-medium">No Image</span>
+                        <ImageIcon className="h-10 w-10" />
+                        <span className="text-xs font-medium">No Image</span>
                       </div>
                     </div>
                   )}
-                  <div className="absolute top-3 right-3">
-                    <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm">
-                      ID: {room.id}
+
+                  {/* Status Badge */}
+                  <div className="absolute top-2 left-2">
+                    <Badge
+                      variant={room.availability ? "default" : "secondary"}
+                      className={`text-xs ${room.availability ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}`}
+                    >
+                      {room.availability ? "Có sẵn" : "Hết phòng"}
                     </Badge>
                   </div>
-                  <div className="absolute top-2 left-2">
-                    <Badge variant={room.availability ? "default" : "secondary"}>
-                      {room.availability ? "Có sẵn" : "Không có sẵn"}
+
+                  {/* ID Badge */}
+                  <div className="absolute top-2 right-2">
+                    <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm text-xs">
+                      #{room.id}
                     </Badge>
+                  </div>
+
+                  {/* Price Overlay */}
+                  <div className="absolute bottom-2 right-2">
+                    <div className="flex items-center space-x-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
+                      <DollarSign className="h-3 w-3 text-green-600" />
+                      <span className="text-xs font-bold text-slate-700">${room.price}</span>
+                    </div>
                   </div>
                 </div>
 
-                <CardHeader className="py-1 px-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{room.roomType}</CardTitle>
-                      <CardDescription className="flex items-center gap-1 mt-1">
-                        <Building2 className="h-4 w-4" />
-                        {room.hotel.name}
-                      </CardDescription>
-                      <p className="text-sm text-muted-foreground mt-1">{room.hotel.address}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">${room.price}</p>
-                      <p className="text-sm text-muted-foreground">mỗi đêm</p>
+                {/* Content Section */}
+                <div className="p-3 flex flex-col flex-grow space-y-3">
+                  {/* Room Info */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors line-clamp-1">
+                      {room.roomType}
+                    </h3>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-1 text-slate-600">
+                        <Building2 className="h-3 w-3 flex-shrink-0" />
+                        <span className="text-xs font-medium truncate">{room.hotel.name}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{room.hotel.address}</p>
                     </div>
                   </div>
-                </CardHeader>
 
-                <CardContent className="pt-0">
+                  {/* Price Info */}
+                  <div className="flex items-center justify-between py-1">
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-primary">${room.price}</p>
+                      <p className="text-xs text-slate-500">mỗi đêm</p>
+                    </div>
+                    <div className="text-xs text-slate-500">Hotel ID: {room.hotel.id}</div>
+                  </div>
 
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleView(room)} className="flex-1">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Xem
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(room)} className="flex-1">
-                      <Edit className="h-4 w-4 mr-1" />
-                      Sửa
-                    </Button>
+                  {/* Action Buttons - Always at bottom */}
+                  <div className="mt-auto pt-2 space-y-2">
+                    {/* Primary Actions Row */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(room)}
+                        className="w-full text-xs h-8"
+                      >
+                        <Eye className="mr-1 h-3 w-3" />
+                        Xem
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleEdit(room)}
+                        className="w-full text-xs h-8"
+                      >
+                        <Edit className="mr-1 h-3 w-3" />
+                        Sửa
+                      </Button>
+                    </div>
+
+                    {/* Secondary Action */}
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleDelete(room)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 text-xs h-8"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="mr-1 h-3 w-3" />
+                      Xóa Phòng
                     </Button>
                   </div>
-                </CardContent>
+                </div>
               </Card>
             ))}
           </div>
@@ -232,19 +267,19 @@ const HotelsPage = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900">
-                    {searchTerm ? "No hotels found" : "No hotels yet"}
+                    {searchTerm ? "Không tìm thấy phòng" : "Chưa có phòng nào"}
                   </h3>
                   <p className="text-slate-600 mt-1">
                     {searchTerm
-                      ? `No rooms match your search "${searchTerm}"`
-                      : "Get started by adding your first room property"}
+                      ? `Không có phòng nào phù hợp với tìm kiếm "${searchTerm}"`
+                      : "Bắt đầu bằng cách thêm phòng đầu tiên"}
                   </p>
                 </div>
                 {!searchTerm && (
-                  <Link href="/admin/hotels/new">
+                  <Link href="/admin/hotels">
                     <Button size="lg" className="mt-4">
                       <Plus className="mr-2 h-4 w-4" />
-                      Hãy thêm phòng đầu tiên
+                      Quản lý khách sạn
                     </Button>
                   </Link>
                 )}
@@ -252,6 +287,7 @@ const HotelsPage = () => {
             </CardContent>
           </Card>
         )}
+
         {/* Dialogs */}
         {selectedRoom && (
           <>
@@ -269,4 +305,4 @@ const HotelsPage = () => {
   )
 }
 
-export default HotelsPage
+export default RoomsPage

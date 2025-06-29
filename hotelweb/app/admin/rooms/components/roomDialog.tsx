@@ -19,7 +19,6 @@ import ImageUpload from '@/components/fileUpload'
 
 interface Props {
   hotelId: number
-  trigger?: React.ReactNode
 }
 
 interface FormData {
@@ -29,7 +28,7 @@ interface FormData {
   imageUrl: string
 }
 
-export default function RoomFormDialog({ hotelId, trigger }: Props) {
+export default function RoomFormDialog({ hotelId }: Props) {
   const [open, setOpen] = useState(false)
   const [countRoomType, setCountRoomType] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -85,12 +84,10 @@ export default function RoomFormDialog({ hotelId, trigger }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ?? (
-          <Button size="sm" variant="default" className="space-x-2">
+          <Button size="sm" variant="default" className="space-x-1" onClick={()=>setOpen(true)}>
             <Plus className="h-4 w-4" />
-            <span>Thêm phòng</span>
+            <span>Phòng</span>
           </Button>
-        )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl overflow-y-auto max-h-[90vh] rounded-xl border bg-white p-6 shadow-xl">
         <DialogHeader>

@@ -13,8 +13,13 @@ export async function GET() {
       include: {
         _count: {
           select: { rooms: true },
+        },
+        amenities:{
+          include:{
+            amenity: true,
+          }
         }
-      }
+      },
     })
 
 

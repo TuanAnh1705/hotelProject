@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 // GET - Fetch single hotel
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const {id}= await params
+    const { id } = await params
     const hotelId = Number(id)
 
     if (isNaN(hotelId)) {
@@ -16,6 +16,13 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const hotel = await prisma.hotel.findUnique({
       where: {
         id: hotelId,
+      },
+      include: {
+        amenities: {
+          include: {
+            amenity: true,
+          },
+        },
       },
     })
 
@@ -33,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 // PUT - Update hotel
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const {id}= await params
+    const { id } = await params
     const hotelId = Number(id)
 
     if (isNaN(hotelId)) {
@@ -75,7 +82,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 // DELETE - Delete hotel
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const hotelId = Number.parseInt(params.id)
+    const { id } = await params
+    const hotelId = Number(id)
 
     if (isNaN(hotelId)) {
       return NextResponse.json({ error: "Invalid hotel ID" }, { status: 400 })
@@ -101,6 +109,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         { status: 400 },
       )
     }
+
+    await prisma.hotelAmenitiesLink.deleteMany({ where: { hotelId } })
 
     await prisma.hotel.delete({
       where: {
